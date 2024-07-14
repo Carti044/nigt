@@ -1,0 +1,141 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const routeButtons = document.querySelectorAll(".route-button");
+    const fromElement = document.getElementById("from");
+    const toElement = document.getElementById("to");
+    const trainsTableBody = document.querySelector("#trains-table tbody");
+    const confirmationModal = document.getElementById("confirmation-modal");
+    const confirmationMessage = document.getElementById("confirmation-message");
+    const seatsContainer = document.getElementById("seats-container");
+    const confirmButton = document.getElementById("confirm-button");
+
+    // Фіктивні дані поїздів
+    const trainData = {
+        "Київ → Львів": [
+            { train: "Інтерсіті 743К", departure: "06:00", arrival: "10:00", duration: "4 години" },
+            { train: "Інтерсіті 749К", departure: "14:00", arrival: "18:00", duration: "4 години" }
+        ],
+        "Київ → Дніпро-Головний": [
+            { train: "Інтерсіті 764К", departure: "08:00", arrival: "12:30", duration: "4 години 30 хвилин" },
+            { train: "Інтерсіті 766К", departure: "16:00", arrival: "20:30", duration: "4 години 30 хвилин" }
+        ],
+        "Київ → Харків": [
+            { train: "Інтерсіті 722К", departure: "07:00", arrival: "11:00", duration: "4 години" },
+            { train: "Інтерсіті 724К", departure: "15:00", arrival: "19:00", duration: "4 години" }
+        ],
+        // Додайте інші напрямки тут за необхідності
+    };
+
+    // Функція для оновлення таблиці з поїздами
+    const updateTrainsTable = (route) => {
+        const trains = trainData[route] || [];
+
+        // Очищення таблиці перед додаванням нових даних
+        trainsTableBody.innerHTML = "";
+
+        trains.forEach(train => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${train.train}</td>
+                <td>${train.departure}</td>
+                <td>${train.arrival}</td>
+                <td>${train.duration}</td>
+                <td><button class="select-button" data-train="${train.train}">Купити</button></td>
+            `;
+            trainsTableBody.appendChild(row);
+        });
+
+        // Додаємо обробник подій на кнопки вибору поїзду
+        document.querySelectorAll('.select-button').forEach(button => {
+            button.addEventListener('click', event => {
+                const train = event.target.getAttribute('data-train');
+                showModal(fromElement.textContent.trim(), toElement.textContent.trim(), train);
+            });
+        });
+    };
+
+    // Функція для відображення модального вікна
+    const showModal = (from, to, train) => {
+        confirmationModal.style.display = "block";
+        confirmationMessage.textContent = `Вибрано поїзд ${train} з ${from} до ${to}`;
+        seatsContainer.innerHTML = ""; // Очищення вмісту контейнера місць (за потреби додати вибір місць)
+    };
+
+    // Обробник події для кнопок маршрутів
+    routeButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const route = button.getAttribute("data-route");
+            const [from, to] = route.split(' → ');
+            fromElement.textContent = from.trim();
+            toElement.textContent = to.trim();
+            updateTrainsTable(route);
+        });
+    });
+
+    // Обробник події для кнопки пошуку поїздів
+    const searchButton = document.getElementById("search-button");
+    searchButton.addEventListener("click", () => {
+        const from = fromElement.textContent.trim();
+        const to = toElement.textContent.trim();
+        const route = `${from} → ${to}`;
+        alert(`Знайти доступні поїзда з: ${from} до: ${to}`);
+        updateTrainsTable(route);
+    });
+
+    // Обробник події для закриття модального вікна
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', () => {
+            confirmationModal.style.display = "none";
+        });
+    });
+
+    // Обробник події для кнопок зміни мови
+    const langUkButton = document.getElementById('lang-uk');
+    const langEnButton = document.getElementById('lang-en');
+
+    langUkButton.addEventListener('click', () => {
+        changeLanguage('uk');
+    });
+
+    langEnButton.addEventListener('click', () => {
+        changeLanguage('en');
+    });
+
+    // Функція для зміни мови на сторінці
+    const changeLanguage = (lang) => {
+        const ukElements = document.querySelectorAll('.lang-uk');
+        const enElements = document.querySelectorAll('.lang-en');
+        const ukButtons = document.querySelectorAll('.lang-button-uk');
+        const enButtons = document.querySelectorAll('.lang-button-en');
+
+        if (lang === 'uk') {
+            ukElements.forEach(element => {
+                element.style.display = 'inline-block';
+            });
+            enElements.forEach(element => {
+                element.style.display = 'none';
+            });
+            ukButtons.forEach(button => {
+                button.style.display = 'inline-block';
+            });
+            enButtons.forEach(button => {
+                button.style.display = 'none';
+            });
+        } else if (lang === 'en') {
+            ukElements.forEach(element => {
+                element.style.display = 'none';
+            });
+            enElements.forEach(element => {
+                element.style.display = 'inline-block';
+            });
+            ukButtons.forEach(button => {
+                button.style.display = 'none';
+            });
+            enButtons.forEach(button => {
+                button.style.display = 'inline-block';
+            });
+        }
+    };
+
+    // Ініціалізація таблиці для початкового маршруту
+    updateTrainsTable("Київ → Львів");
+});
